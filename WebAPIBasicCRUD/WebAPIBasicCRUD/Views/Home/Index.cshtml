@@ -1,0 +1,106 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{ 
+    ViewBag.Title = "Index";
+}
+
+<h1>WebAPI CRUD Operations Demo</h1>
+
+<div class="row">
+    <textarea id="console"  rows="100" style="width:100%;"></textarea>
+
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+
+            //call to prevent later getJSON calls from firing before previous ones
+            //obviously not something to do in a production app, as this blocks
+            //the user from browser interaction...
+            $.ajaxSetup({
+                async:false
+            })
+
+            //select all Models
+            $.getJSON('/api/models', function (data) {
+                $('#console').append('All Models in the Database \r\n');
+                $.each(data, function (key, item) {
+                    $('#console').append(item.ModelId + " | " + item.Name + '\r\n');
+                });
+            });
+
+            //filtered query
+            $.getJSON('/api/Search/PartNumbers?modelName=tape', function (data) {
+                $('#console').append('All Bar Tape Products in the Database \r\n');
+                $.each(data, function (key, item) {
+                    $('#console').append(item.ModelId + " | " + 
+                                         item.ModeName + " | " + 
+                                         item.PartNumberName + " | " +
+                                         item.InventoryPartNumber + " | " +
+                                         item.ListPrice + " | " +
+                                         item.CategoryName + " | " + '\r\n');
+                });
+            });
+
+           
+
+            // create a new model
+            var modelId = 0;
+            var newModel = { Name: "Domane 5.2", ListPrice: 3499.99 };
+
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(newModel),
+                url: "/api/models",
+                contentType: "application/json"
+            }).done(function (result) {
+
+                modelId = result.ModelId;
+
+            });
+            
+            // update model
+            var modelToUpdate = null;
+            $.getJSON('/api/Models/' + modelId, function (data) {
+                modelToUpdate = data;
+            });
+
+            modelToUpdate.Features = "500 Series OCLV Frame";
+
+            $.ajax({
+                type: "PUT",
+                data: JSON.stringify(modelToUpdate),
+                url: "/api/models/" + modelId,
+                contentType: "application/json"
+            })
+
+            //select single model
+            $.getJSON('/api/models/' + modelId, function (data) {
+                $('#console').append('Selected Model:  \r\n');
+                $('#console').append(data.ModelId + " | " + data.Name + '\r\n');
+             
+            });
+
+            // delete model
+            $.ajax({
+                type: "DELETE",
+                url: "/api/models/" + modelId,
+                contentType: "application/json"
+            })
+
+            //select single model (this will be a 404 error as the model was deleted in previous operation)
+            $.getJSON('/api/models/' + modelId, function (data) {
+                $('#console').append('Selected Model:  \r\n');
+                $('#console').append(data.ModelId + " | " + data.Name + '\r\n');
+
+            });
+        
+    } );
+
+    </script>
+
+}
+
