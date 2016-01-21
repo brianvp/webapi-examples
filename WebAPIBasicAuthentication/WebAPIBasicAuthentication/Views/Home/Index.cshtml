@@ -1,0 +1,212 @@
+﻿@{ 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{ 
+    ViewBag.Title = "Index";
+}
+
+<h1>WebAPI Basic Authentication</h1>
+
+<div>
+    <h2>API Path</h2>
+    <a href="/api/models">/api/models</a>
+    <p><small>This api path will prompt for login/pass if clicked before the client-side call below</small></p>
+  
+</div>
+<hr />
+<div>
+    <h2>Execute Client-Side API Call - General Access  - any authenticated user</h2>
+
+    <input id="ClientSubmitButton1" onclick="executeClientSideAPIGeneralAccess()" type="button" value="Execute" />
+
+    <div class="row">
+        <textarea id="ClientOutputGeneralAccess" rows="10" style="width:100%;"></textarea>
+    </div>
+
+    
+</div>
+<hr />
+<div>
+    <h2>Execute Client-Side API Call - Limited Acess - only users in role: "AdvancedUserRole" </h2>
+
+    <input id="ClientSubmitButton2" onclick="executeClientSideAPILimitedAccessGeneralUser()" type="button" value="Execute as as General User" />
+    <input id="ClientSubmitButton3" onclick="executeClientSideAPILimitedAccessAdvancedUser()" type="button" value="Execute as Advanced User" />
+
+    <div class="row">
+        <textarea id="ClientOutputLimitedAccess" rows="10" style="width:100%;"></textarea>
+    </div>
+
+</div>
+<hr />
+<div>
+    <h2>Execute Server-Side API Call</h2>
+
+    <input id="ClientSubmitButton4" onclick="executeServerSideAPICall()" type="button" value="Execute" />
+
+    <div class="row">
+        <textarea id="ServerOutput" rows="10" style="width:100%;"></textarea>
+    </div>
+
+</div>
+
+
+@section scripts {
+    <script>
+
+        function executeClientSideAPIGeneralAccess() {
+
+
+            var apiKey = "5b2025f5c0c847b788545cce506ce6eb";
+            var apiSecret = "556038b0a8d943caaf1c1ddfab70f956";
+
+            //$('#ClientOutputGeneralAccess').val("");
+            
+
+            //select all Models
+            //can specify username/password in call as of jquery 1.7.2 
+            $.ajax({
+                type: "GET",
+                url: "/api/models",
+                dataType: "json",
+                async: false,
+                username: apiKey,
+                password: apiSecret,
+                data: "",
+                success: function (data) {
+
+                    $('#ClientOutputGeneralAccess').html("");
+
+                    $('#ClientOutputGeneralAccess').append('All Models in the Database #1 \r\n');
+                    $.each(data, function (key, item) {
+                        $('#ClientOutputGeneralAccess').append(item.ModelId + " | " + item.Name + '\r\n');
+                    });
+
+                },
+                error: function (XMLHttpRequest, status, error) {
+
+                    $('#ClientOutputGeneralAccess').html("");
+                    $('#ClientOutputGeneralAccess').append(status + " " + error);
+                }
+            });
+
+            //alternate approach, setting headers directly
+            //btoa() available in IE10+
+            /*
+            $.ajax({
+                type: "GET",
+                url: "/api/models",
+                dataType: "json",
+                async: false,
+                headers: {
+                    "Authorization": "Basic " + btoa(apiKey + ":" + apiSecret)
+                },
+                data: "",
+                success: function (data) {
+                    $('#ClientOutputGeneralAccess').append('All Models in the Database #2 \r\n');
+                    $.each(data, function (key, item) {
+                        $('#ClientOutputGeneralAccess').append(item.ModelId + " | " + item.Name + '\r\n');
+                    });
+
+                }
+            });
+            */
+
+
+        }
+
+        function executeClientSideAPILimitedAccessGeneralUser() {
+
+            var apiKey = "5b2025f5c0c847b788545cce506ce6eb";
+            var apiSecret = "556038b0a8d943caaf1c1ddfab70f956";
+
+            $.ajax({
+                type: "GET",
+                url: "/api/PartNumbers",
+                dataType: "json",
+                async: false,
+                username: apiKey,
+                password: apiSecret,
+                data: "",
+                success: function (data) {
+                    $('#ClientOutputLimitedAccess').html("");
+                    $('#ClientOutputLimitedAccess').append('All Part numbers in the Database \r\n');
+                    $.each(data, function (key, item) {
+                        $('#ClientOutputLimitedAccess').append(item.PartNumberId + " | " + item.InvoiceDescription + '\r\n');
+                    });
+
+                },
+                error: function (XMLHttpRequest, status, error) {
+
+                    $('#ClientOutputLimitedAccess').html("");
+                    $('#ClientOutputLimitedAccess').append(status + " " + error);
+                }
+            });
+        }
+
+        function executeClientSideAPILimitedAccessAdvancedUser() {
+
+            var apiKey = "7f5645122a634577a53dca81359138b6";
+            var apiSecret = "3186b763ddb4405bbf0b0d0eac5892cf";
+
+       
+            $.ajax({
+                type: "GET",
+                url: "/api/PartNumbers",
+                dataType: "json",
+                async: false,
+                username: apiKey,
+                password: apiSecret,
+                data: "",
+                success: function (data) {
+                    $('#ClientOutputLimitedAccess').html("");
+          
+                    $('#ClientOutputLimitedAccess').append('All Part numbers in the Database \r\n');
+                    $.each(data, function (key, item) {
+                        $('#ClientOutputLimitedAccess').append(item.PartNumberId + " | " + item.InvoiceDescription + '\r\n');
+                    });
+
+                },
+                error: function (XMLHttpRequest, status, error) {
+
+                    $('#ClientOutputLimitedAccess').html("");
+                    $('#ClientOutputLimitedAccess').append(status + " " + error);
+                }
+            });
+        }
+
+        function executeServerSideAPICall() {
+
+            //can specify username/password in call as of jquery 1.7.2 
+            $.ajax({
+                type: "GET",
+                url: "/api/PartNumberPassThru",
+                dataType: "json",
+                async: false,
+                data: "",
+                success: function (data) {
+                    $('#ServerOutput').html("");
+                    
+                    
+                    $('#ServerOutput').append('All Part numbers in the Database \r\n');
+                    $.each(data, function (key, item) {
+                        $('#ServerOutput').append(item.PartNumberId + " | " + item.InvoiceDescription + '\r\n');
+                    });
+
+                },
+                error: function (XMLHttpRequest, status, error) {
+
+                    $('#ServerOutput').html("");
+                    $('#ServerOutput').append(status + " " + error);
+                }
+            });
+        }
+
+    $(document).ready(function () {
+      
+    } );
+
+    </script>
+
+}
+
